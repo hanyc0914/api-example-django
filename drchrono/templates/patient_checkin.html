@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to drchrono</title>
+</head>
+<body>
+    <form action="/check_in/" method="GET"> {% csrf_token %}
+    	SSN:<br>
+    	<input type="text" name="ssn" value="525-35-4545"><br><br>
+    	First Name:<br>
+    	<input type="text" name="firstname" value="Amy"><br><br>
+    	Last Name:<br>
+    	<input type="text" name="lastname" value="Smith"><br><br>
+    	<input type="submit" value="Check in">
+    </form>
+
+    <br><br>
+
+    <form action="/manage_patient/" method="POST"> {% csrf_token %}
+    	<input type="submit" value="refresh patient database">
+    </form>
+
+    <form action="/manage_doctor/" method="POST"> {% csrf_token %}
+    	<input type="submit" value="refresh doctor database">
+    </form>
+
+    <form action="/manage_appointment/" method="POST"> {% csrf_token %}
+    	<input type="submit" value="refresh appointment database">
+    </form>
+</body>
+</html>

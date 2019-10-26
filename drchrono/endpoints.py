@@ -216,3 +216,8 @@ class DoctorEndpoint(BaseEndpoint):
 
 class AppointmentProfileEndpoint(BaseEndpoint):
     endpoint = "appointment_profiles"
+
+
+class ExamRoomEndpoint(BaseEndpoint):
+    endpoint = "offices"
+        
