@@ -2,6 +2,7 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.core.exceptions import ObjectDoesNotExist
 from social_django.models import UserSocialAuth
 
 from drchrono.endpoints import DoctorEndpoint, PatientEndpoint, AppointmentEndpoint, ExamRoomEndpoint
@@ -87,6 +88,11 @@ class PatientCheckin(TemplateView):
         return kwargs
 
 
+class MakeAppointment(TemplateView):
+    template_name= 'make_appointment.html'
+        
+
+
 def manage_patient(request):
     if request.method == 'POST':
         oauth_provider = UserSocialAuth.objects.get(provider='drchrono')
@@ -152,18 +158,54 @@ def manage_exam_room(request):
 
 
 def check_in(request):
-    ssn = request.GET['ssn']
-    first_name = request.GET['firstname']
-    last_name = request.GET['lastname']
+    patient_id = request.GET['patient_id']
+    apt_id = request.GET['apt_id']
 
     try:
-        patient = models.Patient.objects.get(ssn=ssn, first_name=first_name, last_name=last_name)
+        patient = models.Patient.objects.get(patient_id=patient_id)
+
         try:
-            patient_appointment = models.Appointment.objects.get(patient_id=patient.patient_id)
-            patient.is_checkin = True
-            patient.save()
+            appointment = models.Appointment.objects.get(apt_id=apt_id)
+            if appointment.patient_id != patient.patient_id:
+                return HttpResponse('Patient does not have this appointment, please input again!')
         except ObjectDoesNotExist:
             print('appointment does not exist')
+
     except ObjectDoesNotExist:
-        print('patient does not exist')
-    return HttpResponse('check_in finished!')
+        return HttpResponse('Patient ID is invalid, please input again!')
+    appointment.status = "Checked In"
+    appointment.save()
+    return render(request, 'patient_identity.html', {'patient':patient, 'apt':appointment})
+
+
+def update_information(request):
+    patient_id = request.GET['patient_id']
+    apt_id = request.GET['apt_id']
+    ssn = request.GET['ssn']
+    date_of_birth = request.GET['date_of_birth']
+    gender = request.GET['gender']
+    cell_phone = request.GET['cell_phone']
+    try:
+        patient = models.Patient.objects.get(patient_id=patient_id)
+        patient.ssn = ssn
+        patient.date_of_birth = date_of_birth
+        patient.gender = gender
+        patient.cell_phone = cell_phone
+        patient.save()
+
+        try:
+            appointment = models.Appointment.objects.get(apt_id=apt_id)
+            if appointment.patient_id != patient.patient_id:
+                return HttpResponse('Patient does not have this appointment, please input again!')
+        except ObjectDoesNotExist:
+            print('appointment does not exist')
+
+    except ObjectDoesNotExist:
+        return HttpResponse('Patient ID is invalid, please input again!')
+
+    appointment.status = "Arrived"
+    appointment.save()
+    # oauth_provider = UserSocialAuth.objects.get(provider='drchrono')
+    # access_token = oauth_provider.extra_data['access_token']
+    # api = PatientEndpoint(access_token)
+    return render(request, 'patient_checkin.html', {})

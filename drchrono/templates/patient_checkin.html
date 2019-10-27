@@ -6,13 +6,12 @@
 </head>
 <body>
     <form action="/check_in/" method="GET"> {% csrf_token %}
-    	SSN:<br>
-    	<input type="text" name="ssn" value="525-35-4545"><br><br>
-    	First Name:<br>
-    	<input type="text" name="firstname" value="Amy"><br><br>
-    	Last Name:<br>
-    	<input type="text" name="lastname" value="Smith"><br><br>
-    	<input type="submit" value="Check in">
+    	Patient ID:<br>
+    	<input type="text" name="patient_id" value="84091094"><br><br>
+    	Appointment ID:<br>
+    	<input type="text" name="apt_id" value="131628596"><br><br>
+    	<input type="button" value="Go Back">
+    	<input type="submit" value="Next">
     </form>
 
     <br><br>

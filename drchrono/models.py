@@ -9,7 +9,7 @@ class Patient(models.Model):
 	gender = models.CharField(max_length=10)
 	address = models.CharField(max_length=40, null=True)
 	ssn = models.CharField(max_length=20, null=True)
-	cell_phone = models.CharField(max_length=15, null=True)
+	cell_phone = models.CharField(max_length=40, null=True)
 	email = models.CharField(max_length=20, null=True)
 	doctor_id = models.IntegerField()
 	last_app = models.DateField()
