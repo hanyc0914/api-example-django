@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 # Add your models here
 class Patient(models.Model):
@@ -13,8 +14,8 @@ class Patient(models.Model):
 	ssn = models.CharField(max_length=20, null=True)
 	cell_phone = models.CharField(max_length=40, null=True)
 	email = models.CharField(max_length=20, null=True)
-	doctor_id = models.IntegerField()
-	last_app = models.DateField()
+	doctor_id = models.IntegerField(null=True)
+	last_app = models.DateField(null=True, blank=True)
 	is_checkin = models.BooleanField(default=False)
 
 
@@ -41,12 +42,11 @@ class Appointment(models.Model):
 
 
 class Checkin(models.Model):
-	checkin_id = models.IntegerField(primary_key=True)
 	apt_id = models.IntegerField()
 	patient_id = models.IntegerField()
 	doctor_id = models.IntegerField()
-	checkin_time = models.DateTimeField()
-	receive_time = models.DateTimeField()
+	checkin_time = models.DateTimeField(null=True, blank=True)
+	receive_time = models.DateTimeField(null=True, blank=True)
 
 
 

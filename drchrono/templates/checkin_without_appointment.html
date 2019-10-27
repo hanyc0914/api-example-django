@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to drchrono</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+	Please input your information and click "Next", if you haven't register account then click "Register"<br><br>
+    <form action="newappointment" method="GET"> {% csrf_token %}
+        Patient ID:
+    	<input type="text" name="patient_id" value="{{patient.patient_id}}"><br>
+        First Name:
+        <input type="text" name="firstname" value="{{patient.first_name}}"><br>
+        Last Name:
+        <input type="text" name="lastname" value="{{patient.last_name}}"><br><br>
+
+
+        <input type="submit" name="goback" value="Go Back">
+        <input type="submit" name="next" value="Next">
+        <input type="submit" name="register" value="Register">
+    </form>
+</body>
+</html>

@@ -13,11 +13,14 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'', include('social.apps.django_app.urls', namespace='social')),
     url(r'^checkin/$', views.PatientCheckin.as_view(), name='checkin'),
-    url(r'^makeappointment/$', views.MakeAppointment.as_view(), name='makeappointment'),
-    url(r'^manage_patient/$', views.manage_patient),
-    url(r'^manage_doctor/$', views.manage_doctor),
-    url(r'^manage_appointment/$', views.manage_appointment),
     url(r'^checkin/check_in$', views.check_in),
     url(r'^checkin/confirm_information$', views.confirm_information),
     url(r'^checkin/update_information$', views.update_information),
+    url(r'^newappointment/$', views.NewAppointment.as_view(), name='newappointment'),
+    url(r'^newappointment/newappointment$', views.make_appointment),
+    url(r'^newappointment/update_information$', views.update_information),
+    url(r'^manage_patient/$', views.manage_patient),
+    url(r'^manage_doctor/$', views.manage_doctor),
+    url(r'^manage_appointment/$', views.manage_appointment),
+
 ]

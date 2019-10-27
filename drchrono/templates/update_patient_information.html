@@ -7,8 +7,9 @@
 <body>
 	Please update your information, then click on "next" or click on "submit"<br><br>
     <form action="update_information" method="GET"> {% csrf_token %}
-    	<input type="text" name="patient_id" value={{patient.patient_id}} style="display:none;">
-    	<input type="text" name="apt_id" value={{apt.apt_id}} style="display:none;">
+    	<input type="text" name="patient_id" style="display:none;" value={{patient.patient_id}}>
+    	<input type="text" name="apt_id" style="display:none;" value={{apt.apt_id}}>
+        <input type="text" name="flag"  style="display:none;" value={{flag}}>
     	First Name:
     	<input type="text" name="firstname" required="required" value="{{patient.first_name}}"><br>
     	Last Name:

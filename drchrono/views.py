@@ -3,8 +3,11 @@ from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib import messages
+from django.db.models import Avg, Max, Min
+from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from social_django.models import UserSocialAuth
+import datetime
 
 from drchrono.endpoints import DoctorEndpoint, PatientEndpoint, AppointmentEndpoint, ExamRoomEndpoint
 from . import models
@@ -89,9 +92,8 @@ class PatientCheckin(TemplateView):
         return kwargs
 
 
-class MakeAppointment(TemplateView):
-    template_name= 'make_appointment.html'
-        
+class NewAppointment(TemplateView):
+    template_name= 'checkin_without_appointment.html'
 
 
 def manage_patient(request):
@@ -148,7 +150,7 @@ def manage_exam_room(request):
         oauth_provider = UserSocialAuth.objects.get(provider='drchrono')
         access_token = oauth_provider.extra_data['access_token']
         api = AppointmentEndpoint(access_token)
-        for p in api.list(start='2019-10-17', end='2019-10-18'):
+        for p in api.list(start='2019-10-25', end='2019-10-26'):
             appointment = models.Appointment(apt_id=p[u'id'], doctor_id=p[u'doctor'], patient_id=p[u'patient'], \
                                              scheduled_time=p[u'scheduled_time'], duration=p[u'duration'], \
                                              status=p[u'status'], reason=p[u'reason'], exam_room_id=p[u'exam_room'])
@@ -202,11 +204,15 @@ def confirm_information(request):
     elif request.GET.has_key("confirm"):
         appointment.status = "Arrived"
         appointment.save()
+        checkin = models.Checkin(apt_id=apt_id, doctor_id=appointment.doctor_id, \
+                                 patient_id=patient_id, checkin_time=timezone.now())
+        checkin.save()
         return render(request, 'doctor_welcome.html', {'patient':patient, 'apt':appointment})
     elif request.GET.has_key("reschedule"):
         return HttpResponse("Reshedule isn't available!")
     elif request.GET.has_key("update"):
-        return render(request, 'update_patient_information.html', {'patient':patient, 'apt':appointment})
+        flag = "update_information"
+        return render(request, 'update_patient_information.html', {'patient':patient, 'apt':appointment, 'flag':flag})
 
 
 def update_information(request):
@@ -228,28 +234,48 @@ def update_information(request):
     email = request.GET['email']
 
     if request.GET.has_key('submit'):
-        try:
-            patient = models.Patient.objects.get(patient_id=patient_id)
+        if request.GET['flag'] == "make_appointment":
+            max_patient_id = models.Patient.objects.all().aggregate(Max('patient_id'))['patient_id__max']
+            patient_id = max_patient_id + 1
+            patient = models.Patient(patient_id=patient_id, first_name=first_name, last_name=last_name, \
+                                     date_of_birth=date_of_birth, gender=gender, address=address, \
+                                     ssn=ssn, cell_phone=cell_phone, email=email, city=city, state=state, \
+                                     doctor_id=-1, is_checkin=False)
+            patient.save()
+            return render(request, 'checkin_without_appointment.html', {'patient':patient})
+
+        elif request.GET['flag'] == "update_information":
             try:
-                appointment = models.Appointment.objects.get(apt_id=apt_id)
-                if appointment.patient_id != patient.patient_id:
-                    return HttpResponse('Patient does not have this appointment, please input again!')
+                patient = models.Patient.objects.get(patient_id=patient_id)
+                try:
+                    appointment = models.Appointment.objects.get(apt_id=apt_id)
+                    if appointment.patient_id != patient.patient_id:
+                        return HttpResponse('Patient does not have this appointment, please input again!')
+                except ObjectDoesNotExist:
+                    return HttpResponse('appointment does not exist')
+
             except ObjectDoesNotExist:
-                return HttpResponse('appointment does not exist')
+                return HttpResponse('Patient ID is invalid, please input again!')
 
-        except ObjectDoesNotExist:
-            return HttpResponse('Patient ID is invalid, please input again!')
+            patient.first_name = first_name
+            patient.last_name = last_name
+            patient.date_of_birth = date_of_birth
+            patient.gender = gender
+            patient.address = address
+            patient.city = city
+            patient.state = state
+            patient.ssn = ssn
+            patient.cell_phone = cell_phone
+            patient.email = email
+            patient.save()
+            return render(request, 'patient_identity.html', {'patient':patient, 'apt':appointment})
 
-    patient.first_name = first_name
-    patient.last_name = last_name
-    patient.date_of_birth = date_of_birth
-    patient.gender = gender
-    patient.address = address
-    patient.city = city
-    patient.state = state
-    patient.ssn = ssn
-    patient.cell_phone = cell_phone
-    patient.email = email
-    patient.save()
 
-    return render(request, 'patient_identity.html', {'patient':patient, 'apt':appointment})
+def make_appointment(request):
+    if request.GET.has_key('goback'):
+        return render(request, 'doctor_welcome.html', {})
+    elif request.GET.has_key('next'):
+        return HttpResponse("hello")
+    elif request.GET.has_key('register'):
+        flag = "make_appointment"
+        return render(request, 'update_patient_information.html', {'flag':flag})
