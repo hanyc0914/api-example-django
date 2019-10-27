@@ -202,7 +202,7 @@ def confirm_information(request):
     elif request.GET.has_key("confirm"):
         appointment.status = "Arrived"
         appointment.save()
-        return render(request, 'patient_identity.html', {'patient':patient, 'apt':appointment})
+        return render(request, 'doctor_welcome.html', {'patient':patient, 'apt':appointment})
     elif request.GET.has_key("reschedule"):
         return HttpResponse("Reshedule isn't available!")
     elif request.GET.has_key("update"):
@@ -210,33 +210,46 @@ def confirm_information(request):
 
 
 def update_information(request):
+    if request.GET.has_key('goback'):
+        return render(request, 'patient_identity.html', {'patient':patient, 'apt':appointment})
+
     patient_id = request.GET['patient_id']
     apt_id = request.GET['apt_id']
-    ssn = request.GET['ssn']
+
+    first_name = request.GET['firstname']
+    last_name = request.GET['lastname']
     date_of_birth = request.GET['date_of_birth']
     gender = request.GET['gender']
+    address = request.GET['address']
+    city = request.GET['city']
+    state = request.GET['state']
+    ssn = request.GET['ssn']
     cell_phone = request.GET['cell_phone']
-    try:
-        patient = models.Patient.objects.get(patient_id=patient_id)
-        patient.ssn = ssn
-        patient.date_of_birth = date_of_birth
-        patient.gender = gender
-        patient.cell_phone = cell_phone
-        patient.save()
+    email = request.GET['email']
 
+    if request.GET.has_key('submit'):
         try:
-            appointment = models.Appointment.objects.get(apt_id=apt_id)
-            if appointment.patient_id != patient.patient_id:
-                return HttpResponse('Patient does not have this appointment, please input again!')
+            patient = models.Patient.objects.get(patient_id=patient_id)
+            try:
+                appointment = models.Appointment.objects.get(apt_id=apt_id)
+                if appointment.patient_id != patient.patient_id:
+                    return HttpResponse('Patient does not have this appointment, please input again!')
+            except ObjectDoesNotExist:
+                return HttpResponse('appointment does not exist')
+
         except ObjectDoesNotExist:
-            print('appointment does not exist')
+            return HttpResponse('Patient ID is invalid, please input again!')
 
-    except ObjectDoesNotExist:
-        return HttpResponse('Patient ID is invalid, please input again!')
+    patient.first_name = first_name
+    patient.last_name = last_name
+    patient.date_of_birth = date_of_birth
+    patient.gender = gender
+    patient.address = address
+    patient.city = city
+    patient.state = state
+    patient.ssn = ssn
+    patient.cell_phone = cell_phone
+    patient.email = email
+    patient.save()
 
-    appointment.status = "Arrived"
-    appointment.save()
-    # oauth_provider = UserSocialAuth.objects.get(provider='drchrono')
-    # access_token = oauth_provider.extra_data['access_token']
-    # api = PatientEndpoint(access_token)
-    return render(request, 'patient_checkin.html', {})
+    return render(request, 'patient_identity.html', {'patient':patient, 'apt':appointment})

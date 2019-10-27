@@ -6,32 +6,32 @@
 </head>
 <body>
 	Please update your information, then click on "next" or click on "submit"<br><br>
-    <form action="confirm_information" method="GET"> {% csrf_token %}
+    <form action="update_information" method="GET"> {% csrf_token %}
     	<input type="text" name="patient_id" value={{patient.patient_id}} style="display:none;">
     	<input type="text" name="apt_id" value={{apt.apt_id}} style="display:none;">
     	First Name:
-    	<input type="text" name="firstname" value={{patient.first_name}}><br>
+    	<input type="text" name="firstname" required="required" value="{{patient.first_name}}"><br>
     	Last Name:
-    	<input type="text" name="lastname" value={{patient.last_name}}><br><br>
+    	<input type="text" name="lastname" required="required" value="{{patient.last_name}}"><br><br>
     	Date of Birth:
-    	<input type="text" name="date_of_birth" value={{patient.date_of_birth|date:'Y-m-d'}}><br>
+    	<input type="text" name="date_of_birth" required="required" value="{{patient.date_of_birth|date:'Y-m-d'}}"><br>
     	Gender:
-    	<input type="text" name="gender" value={{patient.gender}}><br>
+    	<input type="text" name="gender" required="required" value="{{patient.gender}}"><br>
     	Address:
-    	<input type="text" name="address" value={{patient.address}}><br>
+    	<input type="text" name="address" required="required" value="{{patient.address}}"><br>
     	City:
-    	<input type="text" name="city" value={{patient.city}}><br>
+    	<input type="text" name="city" required="required" value="{{patient.city}}"><br>
     	State:
-    	<input type="text" name="state" value={{patient.state}}><br>
+    	<input type="text" name="state" required="required" value="{{patient.state}}"><br>
     	Social Security Number:
-    	<input type="text" name="ssn" value={{patient.ssn}}><br>
+    	<input type="text" name="ssn" required="required" value="{{patient.ssn}}"><br>
     	Cell Phone:
-    	<input type="tel" name="cell_phone" value={{patient.cell_phone}}><br>
+    	<input type="tel" name="cell_phone" required="required" value="{{patient.cell_phone}}"><br>
     	Email:
-    	<input type="text" name="email" value={{patient.email}}><br><br>
+    	<input type="text" name="email" required="required" value="{{patient.email}}"><br><br>
 
-    	<input type="button" name="goback" value="Go Back">
-    	<input type="button" name="submit" value="Submit">
+    	<input type="submit" name="goback" value="Go Back">
+    	<input type="submit" name="submit" value="Submit">
     </form>
 </body>
 </html>

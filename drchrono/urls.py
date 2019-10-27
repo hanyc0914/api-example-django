@@ -18,5 +18,6 @@ urlpatterns = [
     url(r'^manage_doctor/$', views.manage_doctor),
     url(r'^manage_appointment/$', views.manage_appointment),
     url(r'^checkin/check_in$', views.check_in),
-    url(r'^checkin/confirm_information$', views.confirm_information)
+    url(r'^checkin/confirm_information$', views.confirm_information),
+    url(r'^checkin/update_information$', views.update_information),
 ]
