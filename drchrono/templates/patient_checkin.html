@@ -5,13 +5,13 @@
     <title>Welcome to drchrono</title>
 </head>
 <body>
-    <form action="/check_in/" method="GET"> {% csrf_token %}
+    <form action="check_in" method="GET"> {% csrf_token %}
     	Patient ID:<br>
     	<input type="text" name="patient_id" value="84091094"><br><br>
     	Appointment ID:<br>
     	<input type="text" name="apt_id" value="131628596"><br><br>
-    	<input type="button" value="Go Back">
-    	<input type="submit" value="Next">
+    	<input type="submit" name="goback" value="Go Back">
+    	<input type="submit" name="next" value="Next">
     </form>
 
     <br><br>

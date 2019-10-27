@@ -7,6 +7,8 @@ class Patient(models.Model):
 	last_name = models.CharField(max_length=20)
 	date_of_birth = models.DateField(null=True)
 	gender = models.CharField(max_length=10)
+	city = models.CharField(max_length=40)
+	state = models.CharField(max_length=40)
 	address = models.CharField(max_length=40, null=True)
 	ssn = models.CharField(max_length=20, null=True)
 	cell_phone = models.CharField(max_length=40, null=True)
@@ -39,10 +41,13 @@ class Appointment(models.Model):
 
 
 class Checkin(models.Model):
-	apt_id = models.IntegerField(primary_key=True)
+	checkin_id = models.IntegerField(primary_key=True)
+	apt_id = models.IntegerField()
 	patient_id = models.IntegerField()
 	doctor_id = models.IntegerField()
-	check_time = models.DateTimeField()
+	checkin_time = models.DateTimeField()
+	receive_time = models.DateTimeField()
+
 
 
 class ExamRoom(models.Model):

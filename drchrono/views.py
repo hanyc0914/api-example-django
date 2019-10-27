@@ -2,6 +2,7 @@ from django.shortcuts import redirect
 from django.views.generic import TemplateView
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from social_django.models import UserSocialAuth
 
@@ -102,6 +103,7 @@ def manage_patient(request):
             patient = models.Patient(patient_id=p[u'id'], first_name=p[u'first_name'], last_name=p[u'last_name'], \
                                      date_of_birth=p[u'date_of_birth'], gender=p[u'gender'], address=p[u'address'], \
                                      ssn=p[u'social_security_number'], cell_phone=p[u'cell_phone'], email=p[u'email'], \
+                                     city=p[u'city'], state=p[u'state'], \
                                      doctor_id=p[u'doctor'], last_app=p[u'date_of_first_appointment'], is_checkin=False)
             patient.save()
     else:
@@ -130,7 +132,7 @@ def manage_appointment(request):
         oauth_provider = UserSocialAuth.objects.get(provider='drchrono')
         access_token = oauth_provider.extra_data['access_token']
         api = AppointmentEndpoint(access_token)
-        for p in api.list(start='2019-10-22', end='2019-10-23'):
+        for p in api.list(start='2019-10-16', end='2019-10-17'):
             appointment = models.Appointment(apt_id=p[u'id'], doctor_id=p[u'doctor'], patient_id=p[u'patient'], \
                                              scheduled_time=p[u'scheduled_time'], duration=p[u'duration'], \
                                              status=p[u'status'], reason=p[u'reason'], exam_room_id=p[u'exam_room'])
@@ -146,7 +148,7 @@ def manage_exam_room(request):
         oauth_provider = UserSocialAuth.objects.get(provider='drchrono')
         access_token = oauth_provider.extra_data['access_token']
         api = AppointmentEndpoint(access_token)
-        for p in api.list(start='2019-10-25', end='2019-10-26'):
+        for p in api.list(start='2019-10-17', end='2019-10-18'):
             appointment = models.Appointment(apt_id=p[u'id'], doctor_id=p[u'doctor'], patient_id=p[u'patient'], \
                                              scheduled_time=p[u'scheduled_time'], duration=p[u'duration'], \
                                              status=p[u'status'], reason=p[u'reason'], exam_room_id=p[u'exam_room'])
@@ -158,24 +160,53 @@ def manage_exam_room(request):
 
 
 def check_in(request):
+    if request.GET.has_key("goback"):
+        return render(request, 'doctor_welcome.html', {})
+    elif request.GET.has_key("next"):
+        patient_id = request.GET['patient_id']
+        apt_id = request.GET['apt_id']
+
+        try:
+            patient = models.Patient.objects.get(patient_id=patient_id)
+
+            try:
+                appointment = models.Appointment.objects.get(apt_id=apt_id)
+                if appointment.patient_id != patient.patient_id:
+                    return HttpResponse('Patient does not have this appointment, please input again!')
+            except ObjectDoesNotExist:
+                print('appointment does not exist')
+
+        except ObjectDoesNotExist:
+            return HttpResponse('Patient ID is invalid, please input again!')
+        #appointment.status = "Checked In"
+        #appointment.save()
+        return render(request, 'patient_identity.html', {'patient':patient, 'apt':appointment})
+
+
+def confirm_information(request):
     patient_id = request.GET['patient_id']
     apt_id = request.GET['apt_id']
-
     try:
         patient = models.Patient.objects.get(patient_id=patient_id)
-
         try:
             appointment = models.Appointment.objects.get(apt_id=apt_id)
             if appointment.patient_id != patient.patient_id:
                 return HttpResponse('Patient does not have this appointment, please input again!')
         except ObjectDoesNotExist:
-            print('appointment does not exist')
-
+            return HttpResponse('appointment does not exist')
     except ObjectDoesNotExist:
         return HttpResponse('Patient ID is invalid, please input again!')
-    appointment.status = "Checked In"
-    appointment.save()
-    return render(request, 'patient_identity.html', {'patient':patient, 'apt':appointment})
+
+    if request.GET.has_key("goback"):
+        return render(request, 'patient_checkin.html', {})
+    elif request.GET.has_key("confirm"):
+        appointment.status = "Arrived"
+        appointment.save()
+        return render(request, 'patient_identity.html', {'patient':patient, 'apt':appointment})
+    elif request.GET.has_key("reschedule"):
+        return HttpResponse("Reshedule isn't available!")
+    elif request.GET.has_key("update"):
+        return render(request, 'update_patient_information.html', {'patient':patient, 'apt':appointment})
 
 
 def update_information(request):
