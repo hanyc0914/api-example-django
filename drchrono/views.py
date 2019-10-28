@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.db.models import Avg, Max, Min
 from django.utils import timezone
+from django.template import Template, Context
 from django.core.exceptions import ObjectDoesNotExist
 from social_django.models import UserSocialAuth
 import datetime
@@ -275,7 +276,49 @@ def make_appointment(request):
     if request.GET.has_key('goback'):
         return render(request, 'doctor_welcome.html', {})
     elif request.GET.has_key('next'):
-        return HttpResponse("hello")
+        doctors = models.Doctor.objects.all()
+        return render(request, 'search_doctor.html', {'doctors':doctors})
     elif request.GET.has_key('register'):
         flag = "make_appointment"
         return render(request, 'update_patient_information.html', {'flag':flag})
+
+
+def doctor(request,did):
+    Week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sun"]
+    s = datetime.datetime.today()
+    w = datetime.datetime.now().weekday() + 1
+    visitdate = []
+    dateprint = []
+    dateweek = []
+    num = 1
+    while num < 8:
+        dateprint.append((s + datetime.timedelta(days=num)).strftime("%m-%d"))
+        visitdate.append((s + datetime.timedelta(days=num)).strftime("%Y-%m-%d"))
+        dateweek.append(Week[(w + num) % 7])
+        num = num + 1
+
+    visitId = [[True for x in range(7)] for y in range(3)]
+    for i in range(7):
+        for j in range(3):
+            if j == 0:
+                time = "m"
+            elif j == 1:
+                time = "a"
+            elif j == 2:
+                time = "e"
+
+    m=[]
+    for i in visitId[0]:
+        m.append(i)
+    doc = models.Doctor.objects.get(doctor_id=did)
+
+    vis = models.Appointment.objects.filter(doctor_id=doc.doctor_id)
+    vtime = []
+    for v in vis:
+        vtime.append(v.scheduled_time)
+
+    fp=open('/usr/src/app/drchrono/templates/doctor_info.html')
+    t=Template(fp.read())
+    fp.close()
+    html = t.render(Context({'date': dateprint, 'morning':visitId[0],'afternoon':visitId[1],'evening':visitId[2],'week':dateweek,'doctor':doc}))
+    return HttpResponse(html)

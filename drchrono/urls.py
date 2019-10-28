@@ -22,5 +22,5 @@ urlpatterns = [
     url(r'^manage_patient/$', views.manage_patient),
     url(r'^manage_doctor/$', views.manage_doctor),
     url(r'^manage_appointment/$', views.manage_appointment),
-
+    url(r'^makeappointment/doctor/(\d+)$', views.doctor),
 ]
